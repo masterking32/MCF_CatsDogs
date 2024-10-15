@@ -13,6 +13,22 @@ class Game:
         self.http = httpRequest
         self.account_name = account_name
 
+    def claim(self):
+        try:
+            response = self.http.post(
+                url="/game/claim",
+            )
+
+            if response is None:
+                self.log.error(f"<r>⭕ <c>{self.account_name}</c> failed to claim!</r>")
+                return None
+
+            return response
+        except Exception as e:
+            self.log.error(f"<r>⭕ <c>{self.account_name}</c> failed to claim!</r>")
+            # self.log.error(f"<r>{e}</r>")
+            return
+
     def current(self):
         try:
             response = self.http.get(

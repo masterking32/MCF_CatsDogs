@@ -5,12 +5,17 @@
 import random
 import sys
 import os
+import time
 
 from utilities.utilities import getConfig
 from .core.HttpRequest import HttpRequest
 from .core.User import User
 from .core.Auth import Auth
 from .core.Game import Game
+from .core.Tasks import Tasks
+
+
+from dateutil import parser
 
 MasterCryptoFarmBot_Dir = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__ + "/../../"))
@@ -147,6 +152,52 @@ class FarmBot:
             self.log.info(
                 f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> coins</g>"
             )
+
+            tasks = Tasks(
+                log=self.log,
+                httpRequest=self.http,
+                account_name=self.account_name,
+            )
+
+            self.log.info(
+                f"<g>📋 Account <c>{self.account_name}</c> is fetching tasks list...</g>"
+            )
+            tasks_list = tasks.list()
+
+            claimed_at = user_info.get("claimed_at", None)
+            if claimed_at is None:
+                claimed_at = "2020-10-15T20:40:25.780995Z"
+
+            claim_timestamp = int(parser.isoparse(claimed_at).timestamp())
+            current_time = int(time.time())
+
+            if current_time - claim_timestamp > 86400:
+                self.log.info(
+                    f"<g>🎁 Account <c>{self.account_name}</c> can claim a reward!</g>"
+                )
+                time.sleep(random.randint(5, 8))
+                claim = game.claim()
+                if claim is not None:
+                    self.log.info(
+                        f"<g>🎁 Account <c>{self.account_name}</c> has successfully claimed a reward!</g>"
+                    )
+
+                    balance = user.balance()
+                    current = game.current()
+
+                    if balance is not None and current is not None:
+                        account_balance = 0
+                        for coin in balance:
+                            account_balance += balance[coin]
+
+                        self.log.info(
+                            f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> coins</g>"
+                        )
+
+                        cats = current.get("cats", 0)
+                        dogs = current.get("dogs", 0)
+                        rewards_cats = current.get("rewards", {}).get("cats", 0)
+                        rewards_dogs = current.get("rewards", {}).get("dogs", 0)
 
         except Exception as e:
             self.log.error(f"<r>⭕ <c>{self.account_name}</c> failed to farm!</r>")

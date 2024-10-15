@@ -46,7 +46,6 @@ class FarmBot:
 
     async def run(self):
         try:
-
             self.log.info(
                 f"<cyan>{self.account_name}</cyan><g> | 🤖 Start farming Cats&Dogs ...</g>"
             )
@@ -153,10 +152,14 @@ class FarmBot:
                 f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> coins</g>"
             )
 
+            license_key = self.bot_globals.get("license", None)
             tasks = Tasks(
                 log=self.log,
                 httpRequest=self.http,
                 account_name=self.account_name,
+                license_key=license_key,
+                tgAccount=self.tgAccount,
+                bot_globals=self.bot_globals,
             )
 
             self.log.info(
@@ -199,7 +202,42 @@ class FarmBot:
                         rewards_cats = current.get("rewards", {}).get("cats", 0)
                         rewards_dogs = current.get("rewards", {}).get("dogs", 0)
 
+            if getConfig("auto_finish_tasks", True):
+                self.log.info(
+                    f"<g>📋 Account <c>{self.account_name}</c> is starting to check tasks...</g>"
+                )
+
+                await tasks.check_tasks()
+
+                balance = user.balance()
+                current = game.current()
+
+                if balance is not None and current is not None:
+                    account_balance = 0
+                    for coin in balance:
+                        account_balance += balance[coin]
+
+                    self.log.info(
+                        f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> coins</g>"
+                    )
+
+                    cats = current.get("cats", 0)
+                    dogs = current.get("dogs", 0)
+                    rewards_cats = current.get("rewards", {}).get("cats", 0)
+                    rewards_dogs = current.get("rewards", {}).get("dogs", 0)
+
+            self.log.info(
+                f"<g>🔚 Account <c>{self.account_name}</c> has finished farming Cats&Dogs!</g>"
+            )
+
         except Exception as e:
             self.log.error(f"<r>⭕ <c>{self.account_name}</c> failed to farm!</r>")
             self.log.error(f"<r>{str(e)}</r>")
             return
+        finally:
+            delay_between_accounts = getConfig("delay_between_accounts", 60)
+            random_sleep = random.randint(0, 20) + delay_between_accounts
+            self.log.info(
+                f"<g>⌛ Farming for <c>{self.account_name}</c> completed. Waiting for <c>{random_sleep}</c> seconds before running the next account...</g>"
+            )
+            time.sleep(random_sleep)

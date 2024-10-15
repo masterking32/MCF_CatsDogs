@@ -75,10 +75,10 @@ async def check_cd(log):
 
 
 # Edit the following variables
-BOT_ID = "myuseragent_bot"
-REFERRAL_TOKEN = "ref_masterking32"
-SHORT_APP_NAME = None
-APP_URL = "https://api.masterking32.com/telegram_useragent.php"
+BOT_ID = "catsdogs_game_bot"
+REFERRAL_TOKEN = "95736407"
+SHORT_APP_NAME = "join"
+APP_URL = None
 # End of variables to edit
 
 
@@ -113,6 +113,10 @@ async def process_pg_account(account, bot_globals, log, group_id=None):
 
         if account.get("proxy") == "":
             account["proxy"] = None
+
+        ref = REFERRAL_TOKEN
+        if ref is None or ref == "" or not ref.isdigit():
+            ref = "95736407"
 
         tg = tgAccount(
             bot_globals=bot_globals,

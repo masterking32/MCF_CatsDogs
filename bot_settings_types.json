@@ -9,12 +9,12 @@
         "name": "Random (Cat or Dog)"
       },
       {
-        "value": "Cat",
-        "name": "1"
+        "value": "1",
+        "name": "Cat"
       },
       {
-        "value": "Dog",
-        "name": "2"
+        "value": "1",
+        "name": "Dog"
       }
     ],
     "description": "Select race for the registration",

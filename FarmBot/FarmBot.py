@@ -92,8 +92,8 @@ class FarmBot:
             if race == 0:
                 race = (
                     random.choice([1, 2])
-                    if getConfig("select_race", 3) == 3
-                    else getConfig("select_race", 1)
+                    if int(getConfig("select_race", "3")) == 3
+                    else int(getConfig("select_race", "1"))
                 )
 
                 register = auth.register(race)

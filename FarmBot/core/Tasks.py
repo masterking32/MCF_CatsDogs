@@ -30,6 +30,7 @@ class Tasks:
         self.license_key = license_key
         self.tgAccount = tgAccount
         self.bot_globals = bot_globals
+        self.hasJoinBefore = False
 
     async def check_tasks(self, tasks_list=None):
         if self.tasks is None and tasks_list is None:
@@ -59,6 +60,9 @@ class Tasks:
                     if self.tgAccount is None or not getConfig("join_channels", True):
                         continue
 
+                    if self.hasJoinBefore:
+                        continue
+
                     channel_url = task.get("link")
                     if channel_url is None or channel_url == "":
                         continue
@@ -82,9 +86,11 @@ class Tasks:
 
                     try:
                         await self.tgAccount.joinChat(channel_url)
-                        time.sleep(random.randint(5, 10))
                     except Exception as e:
                         pass
+
+                    self.hasJoinBefore = True
+                    time.sleep(random.randint(5, 10))
 
                 elif task["type"] in ["okx", "invite"]:
                     continue
@@ -93,6 +99,9 @@ class Tasks:
                         continue
 
                     if self.tgAccount is None or not getConfig("start_bots", True):
+                        continue
+
+                    if self.hasJoinBefore:
                         continue
 
                     sub_tasks = self.get_sub_tasks(task_id)
@@ -160,9 +169,10 @@ class Tasks:
 
                         self.log.info(f"<g>✅ Bot <c>{bot_id}</c> started!</g>")
 
-                        time.sleep(random.randint(5, 10))
                     except Exception as e:
                         pass
+
+                    time.sleep(random.randint(5, 10))
 
                 else:
                     continue

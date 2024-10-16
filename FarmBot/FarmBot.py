@@ -174,7 +174,7 @@ class FarmBot:
             claim_timestamp = int(parser.isoparse(claimed_at).timestamp())
             current_time = int(time.time())
 
-            if current_time - claim_timestamp > 86400:
+            if current_time - claim_timestamp > 28805:
                 self.log.info(
                     f"<g>🎁 Account <c>{self.account_name}</c> can claim a reward!</g>"
                 )

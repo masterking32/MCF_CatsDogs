@@ -50,6 +50,10 @@ class FarmBot:
                 f"<cyan>{self.account_name}</cyan><g> | 🤖 Start farming Cats&Dogs ...</g>"
             )
 
+            self.log(
+                "Module Required update. Please wait for new version to be released."
+            )
+            return
             self.http = HttpRequest(
                 log=self.log,
                 proxy=self.proxy,

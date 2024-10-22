@@ -84,12 +84,12 @@ class FarmBot:
                 account_name=self.account_name,
             )
 
-            auth_info = auth.days()
-            self.log.info(
-                f"<g>📅 The age of account <c>{self.account_name}</c> is <c>{auth_info.get('days')}</c> days</g>"
-            )
-
             if race == 0:
+                auth_info = auth.days()
+                self.log.info(
+                    f"<g>📅 The age of account <c>{self.account_name}</c> is <c>{auth_info.get('days')}</c> days</g>"
+                )
+
                 race = (
                     random.choice([1, 2])
                     if int(getConfig("select_race", "3")) == 3

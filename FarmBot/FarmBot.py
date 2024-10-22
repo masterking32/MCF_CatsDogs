@@ -50,7 +50,7 @@ class FarmBot:
                 f"<cyan>{self.account_name}</cyan><g> | 🤖 Start farming Cats&Dogs ...</g>"
             )
 
-            self.log(
+            self.log.info(
                 "Module Required update. Please wait for new version to be released."
             )
             return

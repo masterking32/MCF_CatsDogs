@@ -87,7 +87,7 @@ REFERRAL_TOKEN = utilities.getConfig(
 )
 SHORT_APP_NAME = "join"
 APP_URL = None
-VERSION_HASH = "a85ec0466c7f8fc6a20d03ae0ae60c4f"
+VERSION_HASH = "36cbff2d503326c385a4a48566f0fa47"
 # End of variables to edit
 
 

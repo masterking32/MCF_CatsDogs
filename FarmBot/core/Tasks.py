@@ -53,44 +53,140 @@ class Tasks:
 
                 task_id = task.get("id")
                 task_title = task.get("title", "")
+                verification_code = None
 
                 if task["type"] in ["inst", "tik"]:
                     pass
-                elif task["type"] in ["tg", "channel"]:
-                    if self.tgAccount is None or not getConfig("join_channels", True):
+                elif task["type"] == "video_code" and "link" in task:
+                    video_code = task["link"]
+
+                    data = {
+                        "task_type": "keyword",
+                        "task_id": video_code,
+                        "task_name": video_code,
+                    }
+
+                    api_response = self.get_api_data(data, license_key=self.license_key)
+                    if not api_response:
+                        self.log.info(
+                            f"<y><c>{self.account_name}</c> | 🟡 Answer for task {task.get('name', '')} not found on API ...</y>"
+                        )
+                        continue
+                    answer = api_response.get("answer", "")
+                    if not answer:
                         continue
 
+                    verification_code = answer
+
+                elif (
+                    "link" in task
+                    and task["link"] is not None
+                    and task["link"] != ""
+                    and "t.me/" in task["link"]
+                ):
                     if self.hasJoinBefore:
                         continue
 
-                    channel_url = task.get("link")
-                    if channel_url is None or channel_url == "":
-                        continue
-
-                    if "+" not in channel_url:
-                        channel_url = (
-                            channel_url.replace("https://t.me/", "")
-                            .replace("@", "")
-                            .replace("boost/", "")
-                        )
-
-                        channel_url = (
-                            channel_url.split("/")[0]
-                            if "/" in channel_url
-                            else channel_url
-                        )
-
-                    self.log.info(
-                        f"<g>📝 <c>{self.account_name}</c> | Attempting to join the <c>{channel_url}</c> channel to complete the <c>{task_title}</c> task</g>"
-                    )
-
+                    isBot = False
                     try:
-                        await self.tgAccount.joinChat(channel_url)
+                        url = task["link"]
+                        if "?start" in task["link"]:
+                            isBot = True
+                        elif "?" in url:
+                            tmp_url = url.split("?")[0]
+
+                            url_without_http = tmp_url.replace("https://", "")
+                            url_without_http = url_without_http.replace("http://", "")
+
+                            if "/" in url_without_http and url_without_http.split("/")[
+                                1
+                            ].lower().endswith("bot"):
+                                isBot = True
                     except Exception as e:
                         pass
 
-                    self.hasJoinBefore = True
-                    time.sleep(random.randint(5, 10))
+                    if isBot:
+                        if self.tgAccount is None or not getConfig("start_bots", True):
+                            continue
+
+                        data = {
+                            "task_type": "invite",
+                            "task_data": task["link"],
+                        }
+
+                        api_response = self.get_api_data(
+                            data, license_key=self.license_key
+                        )
+                        if (
+                            api_response is None
+                            or "status" not in api_response
+                            or api_response["status"] != "success"
+                        ):
+                            continue
+
+                        ref_link = api_response.get("referral")
+                        bot_id = api_response.get("bot_id")
+
+                        if ref_link is None or bot_id is None:
+                            continue
+
+                        self.log.info(
+                            f"<g>🚀 Starting bot for task <c>{task_title}</c>...</g>"
+                        )
+
+                        try:
+                            tg = TG(
+                                bot_globals=self.bot_globals,
+                                log=self.log,
+                                accountName=self.account_name,
+                                proxy=self.http.proxy,
+                                BotID=bot_id,
+                                ReferralToken=ref_link,
+                                MuteBot=True,
+                            )
+
+                            await tg.getWebViewData()
+
+                            self.log.info(f"<g>✅ Bot <c>{bot_id}</c> started!</g>")
+
+                        except Exception as e:
+                            pass
+
+                        time.sleep(random.randint(5, 10))
+                    else:
+                        if self.tgAccount is None or not getConfig(
+                            "join_channels", True
+                        ):
+                            continue
+
+                        channel_url = task.get("link")
+                        if channel_url is None or channel_url == "":
+                            continue
+
+                        if "+" not in channel_url:
+                            channel_url = (
+                                channel_url.replace("https://t.me/", "")
+                                .replace("@", "")
+                                .replace("boost/", "")
+                            )
+
+                            channel_url = (
+                                channel_url.split("/")[0]
+                                if "/" in channel_url
+                                else channel_url
+                            )
+
+                        self.log.info(
+                            f"<g>📝 <c>{self.account_name}</c> | Attempting to join the <c>{channel_url}</c> channel to complete the <c>{task_title}</c> task</g>"
+                        )
+
+                        try:
+                            await self.tgAccount.joinChat(channel_url)
+                        except Exception as e:
+                            pass
+
+                        self.hasJoinBefore = True
+                        time.sleep(random.randint(5, 10))
 
                 elif task["type"] in ["okx", "invite"]:
                     continue
@@ -109,71 +205,8 @@ class Tasks:
                         continue
 
                     await self.check_tasks(sub_tasks)
-                elif task["type"] == "twitter" or "t.me/" in task["link"]:
-                    if "t.me/" not in task["link"]:
-                        self.log.info(
-                            f"<g>📝 <c>{self.account_name}</c> | Trying to complete <c>{task_title}</c> task</g>"
-                        )
-
-                        response = None
-                        if tasks_list is not None:
-                            response = self.claim_sub_task(task_id)
-                        else:
-                            response = self.claim(task_id)
-                        time.sleep(random.randint(5, 10))
-                        continue
-
-                    if (
-                        self.tgAccount is None
-                        or not getConfig("start_bots", True)
-                        or "+" in task["link"]
-                        or "?" not in task["link"]
-                    ):
-                        continue
-
-                    data = {
-                        "task_type": "invite",
-                        "task_data": task["link"],
-                    }
-
-                    api_response = self.get_api_data(data, license_key=self.license_key)
-                    if (
-                        api_response is None
-                        or "status" not in api_response
-                        or api_response["status"] != "success"
-                    ):
-                        continue
-
-                    ref_link = api_response.get("referral")
-                    bot_id = api_response.get("bot_id")
-
-                    if ref_link is None or bot_id is None:
-                        continue
-
-                    self.log.info(
-                        f"<g>🚀 Starting bot for task <c>{task_title}</c>...</g>"
-                    )
-
-                    try:
-                        tg = TG(
-                            bot_globals=self.bot_globals,
-                            log=self.log,
-                            accountName=self.account_name,
-                            proxy=self.http.proxy,
-                            BotID=bot_id,
-                            ReferralToken=ref_link,
-                            MuteBot=True,
-                        )
-
-                        await tg.getWebViewData()
-
-                        self.log.info(f"<g>✅ Bot <c>{bot_id}</c> started!</g>")
-
-                    except Exception as e:
-                        pass
-
-                    time.sleep(random.randint(5, 10))
-
+                elif task["type"] == "twitter":
+                    pass
                 else:
                     continue
 
@@ -185,7 +218,8 @@ class Tasks:
                 if tasks_list is not None:
                     response = self.claim_sub_task(task_id)
                 else:
-                    response = self.claim(task_id)
+                    response = self.claim(task_id, verification_code)
+
                 if (
                     response is not None
                     and "status" in response
@@ -268,11 +302,15 @@ class Tasks:
             )
             return None
 
-    def claim(self, task_id):
+    def claim(self, task_id, verification_code=None):
         try:
+            data = {"task_id": task_id}
+            if verification_code is not None:
+                data["verification_code"] = verification_code
+
             response = self.http.post(
                 url="/tasks/claim",
-                data=json.dumps({"task_id": task_id}),
+                data=json.dumps(data),
                 display_errors=False,
             )
 

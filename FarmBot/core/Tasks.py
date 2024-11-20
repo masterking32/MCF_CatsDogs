@@ -134,6 +134,8 @@ class Tasks:
                             f"<g>🚀 Starting bot for task <c>{task_title}</c>...</g>"
                         )
 
+                        self.hasJoinBefore = True
+
                         try:
                             tg = TG(
                                 bot_globals=self.bot_globals,

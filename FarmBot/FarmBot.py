@@ -138,18 +138,18 @@ class FarmBot:
                 )
 
             balance = user.balance()
-            if balance is None:
+            if balance is None or "balance" not in balance:
                 self.log.error(
                     f"<r>⭕ <c>{self.account_name}</c> failed to get user balance!</r>"
                 )
                 return
 
             account_balance = 0
-            for coin in balance:
-                account_balance += balance[coin]
+            if "food" in balance["balance"]:
+                account_balance = balance["balance"]["food"]
 
             self.log.info(
-                f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> coins</g>"
+                f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> food</g>"
             )
 
             license_key = self.bot_globals.get("license", None)
@@ -190,11 +190,11 @@ class FarmBot:
 
                     if balance is not None and current is not None:
                         account_balance = 0
-                        for coin in balance:
-                            account_balance += balance[coin]
+                        if "balance" in balance and "food" in balance["balance"]:
+                            account_balance = balance["balance"]["food"]
 
                         self.log.info(
-                            f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> coins</g>"
+                            f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> food</g>"
                         )
 
                         cats = current.get("cats", 0)
@@ -214,11 +214,12 @@ class FarmBot:
 
                 if balance is not None and current is not None:
                     account_balance = 0
-                    for coin in balance:
-                        account_balance += balance[coin]
+
+                    if "balance" in balance and "food" in balance["balance"]:
+                        account_balance = balance["balance"]["food"]
 
                     self.log.info(
-                        f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> coins</g>"
+                        f"<g>💰 Account <c>{self.account_name}</c> has a balance of <c>{account_balance}</c> food</g>"
                     )
 
                     cats = current.get("cats", 0)

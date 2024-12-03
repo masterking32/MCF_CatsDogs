@@ -37,6 +37,9 @@ class Tasks:
             return False
 
         tasks = self.tasks if tasks_list is None else tasks_list
+
+        random.shuffle(tasks)
+
         for task in tasks:
             try:
                 if (

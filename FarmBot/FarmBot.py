@@ -240,6 +240,11 @@ class FarmBot:
                 "Cats: " + str(cats) + " | Dogs: " + str(dogs),
                 balance["balance"]["food"],
             )
+            inc_display_data(
+                "display_data.json",
+                "success_accounts",
+                {"title": "Successfull farm finished accounts", "name": "count"},
+            )
         except Exception as e:
             add_account_to_display_data(
                 "display_data_bot_issues.json", self.account_name

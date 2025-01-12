@@ -7,7 +7,7 @@ import sys
 import os
 import time
 
-from utilities.utilities import add_account_to_display_data, getConfig
+from utilities.utilities import add_account_to_display_data, getConfig, inc_display_data
 from .core.HttpRequest import HttpRequest
 from .core.User import User
 from .core.Auth import Auth

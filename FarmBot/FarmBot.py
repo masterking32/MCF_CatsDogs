@@ -7,7 +7,7 @@ import sys
 import os
 import time
 
-from utilities.utilities import getConfig
+from utilities.utilities import add_account_to_display_data, getConfig
 from .core.HttpRequest import HttpRequest
 from .core.User import User
 from .core.Auth import Auth
@@ -70,6 +70,9 @@ class FarmBot:
             user_info = user.info()
 
             if user_info is None:
+                add_account_to_display_data(
+                    "display_data_bot_issues.json", self.account_name
+                )
                 self.log.error(
                     f"<r>⭕ <c>{self.account_name}</c> failed to get user info!</r>"
                 )
@@ -231,7 +234,16 @@ class FarmBot:
                 f"<g>🔚 Account <c>{self.account_name}</c> has finished farming Cats&Dogs!</g>"
             )
 
+            add_account_to_display_data(
+                "display_data_success_accounts.json",
+                self.account_name,
+                "Cats: " + str(cats) + " | Dogs: " + str(dogs),
+                balance["balance"]["food"],
+            )
         except Exception as e:
+            add_account_to_display_data(
+                "display_data_bot_issues.json", self.account_name
+            )
             self.log.error(f"<r>⭕ <c>{self.account_name}</c> failed to farm!</r>")
             self.log.error(f"<r>{str(e)}</r>")
             return
